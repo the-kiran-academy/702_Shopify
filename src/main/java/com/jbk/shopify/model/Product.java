@@ -1,17 +1,25 @@
 package com.jbk.shopify.model;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
 public class Product {
 
 	
 	private Long productId;
 	
+	@NotBlank
+	@Pattern(regexp = "^[a-zA-Z]+[a-zA-Z0-9]*$", message = "Product not valid")
 	private String productName;
 
 	private Supplier supplier;
 	private Category category;
 
+	@Min(1)
 	private Integer productQty;
 
+	@Min(1)
 	private Double productPrice;
 
 	public Product() {

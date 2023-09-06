@@ -35,28 +35,36 @@ public class ProductDaoIMPL implements ProductDao {
 	private EntityToModel entityToModel;
 
 	@Override
-	public int saveProduct(Product product) {
-
+	public String saveProduct(Product product) {
+		String status = null;
 		try (Session session = sessionFactory.openSession();) {
 
 			ProductEntity productEntity = modelToEntity.convertToEntity(product);
-			session.save(productEntity);
-			session.beginTransaction().commit();
-			return 1;
+
+			Product dbProduct = getProductByName(product.getProductName());
+			if (dbProduct == null) {
+				session.save(productEntity);
+				session.beginTransaction().commit();
+				status = "Saved !!";
+			} else {
+				status = "Already Exists";
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			status = "Something Wrong";
 
 		}
 
-		return 0;
+		return status;
+
 	}
 
 	@Override
 	public Product getProductById(long productId) {
 		Product productModel = null;
 
-		try (Session session = sessionFactory.openSession();){
+		try (Session session = sessionFactory.openSession();) {
 			ProductEntity productEntity = session.get(ProductEntity.class, productId);
 			if (productEntity != null) {
 				productModel = entityToModel.convertToModel(productEntity);
@@ -65,21 +73,20 @@ public class ProductDaoIMPL implements ProductDao {
 			e.printStackTrace();
 		}
 
-		
 		return productModel;
 	}
 
 	@Override
 	public List<Product> getAllProduct() {
-		
-		List<Product> list=null;
-		try(Session session = sessionFactory.openSession();) {
+
+		List<Product> list = null;
+		try (Session session = sessionFactory.openSession();) {
 			Criteria criteria = session.createCriteria(ProductEntity.class);
-			 list = criteria.list();
+			list = criteria.list();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
+
 		return list;
 	}
 

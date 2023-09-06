@@ -10,7 +10,7 @@ import com.jbk.shopify.model.Product;
 
 public interface ProductService {
 
-	public int saveProduct(Product product);
+	public Object saveProduct(Product product);
 
 	public Product getProductById(long productId);
 	

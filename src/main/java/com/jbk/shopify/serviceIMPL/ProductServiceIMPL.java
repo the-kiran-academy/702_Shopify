@@ -9,14 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,13 +21,13 @@ import com.jbk.shopify.model.FinalProduct;
 import com.jbk.shopify.model.Product;
 import com.jbk.shopify.model.Supplier;
 import com.jbk.shopify.service.ProductService;
+import com.jbk.shopify.utility.ValidateObject;
 
 @Service
 public class ProductServiceIMPL implements ProductService {
 
 	@Autowired
 	private ProductDao productDao;
-
 
 
 	@Autowired
@@ -45,15 +37,24 @@ public class ProductServiceIMPL implements ProductService {
 
 	
 	@Override
-	public int saveProduct(Product product) {
+	public Object saveProduct(Product product) {
 
 		String productId = new SimpleDateFormat("yyyyMMddHHmmsss").format(new java.util.Date());
 
 		product.setProductId(Long.parseLong(productId));
-	
-		int uploadedCount = productDao.saveProduct(product);
+		
+		return productDao.saveProduct(product);
+		
+		
+//		Map<String, String> errorMap = ValidateObject.validateProduct(product);
+//		
+//		if(errorMap.isEmpty()) {
+//			String status = productDao.saveProduct(product);
+//			return status;
+//		}else {
+//			return errorMap;
+//		}
 
-		return uploadedCount;
 	}
 
 	@Override
