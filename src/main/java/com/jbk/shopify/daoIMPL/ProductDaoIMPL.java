@@ -35,8 +35,8 @@ public class ProductDaoIMPL implements ProductDao {
 	private EntityToModel entityToModel;
 
 	@Override
-	public String saveProduct(Product product) {
-		String status = null;
+	public int saveProduct(Product product) {
+		int status = 0;
 		try (Session session = sessionFactory.openSession();) {
 
 			ProductEntity productEntity = modelToEntity.convertToEntity(product);
@@ -45,14 +45,14 @@ public class ProductDaoIMPL implements ProductDao {
 			if (dbProduct == null) {
 				session.save(productEntity);
 				session.beginTransaction().commit();
-				status = "Saved !!";
+				status = 1;
 			} else {
-				status = "Already Exists";
+				status = 2;
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			status = "Something Wrong";
+			status = 3;
 
 		}
 

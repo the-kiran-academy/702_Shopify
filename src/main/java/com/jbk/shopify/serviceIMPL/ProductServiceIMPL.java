@@ -5,10 +5,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -29,23 +37,20 @@ public class ProductServiceIMPL implements ProductService {
 	@Autowired
 	private ProductDao productDao;
 
-
 	@Autowired
 	private FinalProduct finalProduct;
 	@Autowired
 	private Charges charges;
 
-	
 	@Override
 	public Object saveProduct(Product product) {
 
 		String productId = new SimpleDateFormat("yyyyMMddHHmmsss").format(new java.util.Date());
 
 		product.setProductId(Long.parseLong(productId));
-		
+
 		return productDao.saveProduct(product);
-		
-		
+
 //		Map<String, String> errorMap = ValidateObject.validateProduct(product);
 //		
 //		if(errorMap.isEmpty()) {
@@ -146,8 +151,121 @@ public class ProductServiceIMPL implements ProductService {
 
 	@Override
 	public Product getProductByName(String productName) {
-		
+
 		return productDao.getProductByName(productName);
+	}
+
+	public List<Product> readFile(String filePath) {
+		Product product = null;
+		List<Product> list = new ArrayList<Product>();
+		try (FileInputStream fis = new FileInputStream(filePath); Workbook workbook = new XSSFWorkbook(fis);) {
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Iterator<Row> rows = sheet.rowIterator();
+
+			while (rows.hasNext()) {
+				Row row = rows.next();
+
+				if (row.getRowNum() == 0) {
+					continue;
+				}
+
+				product = new Product();
+				String productId = new SimpleDateFormat("yyyyMMddHHmm").format(new java.util.Date());
+
+				Random random = new Random();
+				int num = random.nextInt(899) + 100;
+				productId = productId + num;
+				product.setProductId(Long.parseLong(productId));
+
+				Iterator<Cell> cells = row.cellIterator();
+
+				while (cells.hasNext()) {
+					Cell cell = (Cell) cells.next();
+
+					int columnIndex = cell.getColumnIndex();
+
+					switch (columnIndex) {
+					case 0: {
+						product.setProductName(cell.getStringCellValue());
+						break;
+					}
+
+					case 1: {
+						Supplier supplier = new Supplier();
+						supplier.setSupplierId((long) cell.getNumericCellValue());
+						product.setSupplier(supplier);
+						break;
+					}
+
+					case 2: {
+						Category category = new Category();
+						category.setCategoryId((long) cell.getNumericCellValue());
+						product.setCategory(category);
+						break;
+					}
+
+					case 3: {
+						product.setProductQty((int) cell.getNumericCellValue());
+						break;
+					}
+
+					case 4: {
+						product.setProductPrice(cell.getNumericCellValue());
+						break;
+					}
+
+					}
+
+				}
+				list.add(product);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+
+	}
+
+	@Override
+	public Object uploadSheet(MultipartFile file) {
+		String path = "src/main/resources/";
+		String fileName = file.getOriginalFilename();
+		List<Product> list = null;
+		int status = 0;
+		int uploadedRecords = 0;
+		int existsRecords = 0;
+		try (FileOutputStream fos = new FileOutputStream(path + fileName);) {
+
+			byte[] data = file.getBytes();
+			fos.write(data);
+
+			list = readFile(path + fileName);
+
+			for (Product product : list) {
+				status = productDao.saveProduct(product);
+
+				if (status == 1) {
+					uploadedRecords = uploadedRecords + 1;
+				} else if (status == 2) {
+					existsRecords = existsRecords + 1;
+				}
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("Uploaded Records", uploadedRecords);
+		map.put("Already Exists Record", existsRecords);
+
+		return map;
 	}
 
 }

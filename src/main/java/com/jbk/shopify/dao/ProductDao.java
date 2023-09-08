@@ -6,7 +6,7 @@ import com.jbk.shopify.model.Product;
 
 public interface ProductDao {
 
-	public String saveProduct(Product product);
+	public int saveProduct(Product product);
 
 	public Product getProductById(long productId);
 

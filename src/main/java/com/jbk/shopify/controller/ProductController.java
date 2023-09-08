@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.jbk.shopify.exceptions.ProductNotExistsException;
 import com.jbk.shopify.model.FinalProduct;
@@ -30,7 +33,7 @@ public class ProductController {
 	public Object saveProduct(@RequestBody @Valid Product product) {
 
 		Object obj = productService.saveProduct(product);
-			return obj;
+		return obj;
 	}
 
 	@GetMapping("get-product-by-id/{id}")
@@ -39,9 +42,9 @@ public class ProductController {
 		if (product != null) {
 			return new ResponseEntity<Object>(product, HttpStatus.FOUND);
 		} else {
-			//throw new ProductNotExistsException("Product Not Exists");
-			
-			throw new  RuntimeException("Product Not Exists");
+			// throw new ProductNotExistsException("Product Not Exists");
+
+			throw new RuntimeException("Product Not Exists");
 		}
 	}
 
@@ -64,6 +67,14 @@ public class ProductController {
 		} else {
 			return new ResponseEntity<Object>("Product Not Exists With Id = " + id, HttpStatus.NO_CONTENT);
 		}
+
+	}
+
+	@PostMapping("/upload-sheet")
+	public ResponseEntity<Object> uploadSheet(@RequestPart MultipartFile myFile) {
+		Object object = productService.uploadSheet(myFile);
+
+		return ResponseEntity.ok(object);
 
 	}
 

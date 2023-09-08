@@ -34,6 +34,6 @@ public interface ProductService {
 
 	public FinalProduct getFinalProductById(long id);
 	
-	//public Map<String, Object> uploadSheet(MultipartFile file);
+	public Object uploadSheet(MultipartFile file);
 
 }
